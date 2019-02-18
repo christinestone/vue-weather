@@ -3,8 +3,9 @@
     <h1>{{ this.city }}, {{ this.country }}</h1>
     {{ this.forecast }}
     <br>
-    {{ this.converted }}°{{ this.degrees }}
-    <button v-on:click="convertDegrees()">{{ this.text }}</button>
+    {{ this.converted }}
+    <toggle-button @change="convertDegrees()" color="#82C7EB" :value="true" :labels="{checked: 'C', unchecked: 'F'}" />
+
   </div>
 </template>
 <script>
@@ -19,7 +20,6 @@ export default {
       temp:      0,
       converted: 0,
       degrees:   'C',
-      text:      'C to F',
       city:      '',
       country:   '',
       forecast:  '',
@@ -45,10 +45,8 @@ export default {
     convertDegrees() {
       if (this.degrees == 'C') {
         this.converted = (this.temp * 9/5) + 32
-        this.text = 'C'
         this.degrees = 'F'
       } else {
-        this.text = 'C to F'
         this.converted = this.temp
         this.degrees = 'C'
       }
