@@ -1,13 +1,10 @@
 <template>
   <div class="container" v-cloak>
     <h1>{{ this.city }}, {{ this.country }}</h1>
-        <div v-for="result in results">
-          {{ result }}
-        </div>
-        <div v-if="!this.isHidden">
-          <button v-on:click="convertDegrees()"> {{ this.text }}</button>
-          {{ this.converted }}°{{ this.degrees }}
-        </div>
+    {{ this.forecast }}
+    <br>
+    {{ this.converted }}°{{ this.degrees }}
+    <button v-on:click="convertDegrees()">{{ this.text }}</button>
   </div>
 </template>
 <script>
@@ -19,16 +16,15 @@ export default {
     return {
       longitude: 0,
       latitude:  0,
-      error:     '',
-      results:   [],
       temp:      0,
+      converted: 0,
       degrees:   'C',
       text:      'C to F',
-      converted:  0,
-      isHidden:   true,
-      city:       '',
-      country:    '',
-      forecast:   ''
+      city:      '',
+      country:   '',
+      forecast:  '',
+      error:     '',
+      results:   []
     };
   },
 
@@ -37,20 +33,19 @@ export default {
         axios.get('https://fcc-weather-api.glitch.me/api/current?lat='
          + this.latitude + '&lon=' + this.longitude)
         .then((response) => {
+
           this.results = response.data
-          this.temp = response.data.main.temp
+          this.temp = this.results.main.temp
           this.converted = this.temp
           this.country = this.results.sys.country
           this.city = this.results.name
-          this.forecast = this.results.weather.main
-            + ": " + this.results.weather.description
+          this.forecast = this.results.weather[0].main + ": " + this.results.weather[0].description
         })
-        this.isHidden = false
      },
     convertDegrees() {
       if (this.degrees == 'C') {
-        this.text = 'F to C'
         this.converted = (this.temp * 9/5) + 32
+        this.text = 'C'
         this.degrees = 'F'
       } else {
         this.text = 'C to F'
