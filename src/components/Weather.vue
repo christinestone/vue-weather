@@ -1,16 +1,13 @@
 <template>
-  <div class="container">
-    <h1>{{ this.results.name }} Weather</h1>
-      <div class="location">
-        <p>
-
-        <button v-on:click="getWeather()">get weather</button>
+  <div class="container" v-cloak>
+    <h1>{{ this.city }}, {{ this.country }}</h1>
         <div v-for="result in results">
           {{ result }}
         </div>
-
-      </p>
-      </div>
+        <div v-if="!this.isHidden">
+          <button v-on:click="convertDegrees()"> {{ this.text }}</button>
+          {{ this.converted }}°{{ this.degrees }}
+        </div>
   </div>
 </template>
 <script>
@@ -23,28 +20,52 @@ export default {
       longitude: 0,
       latitude:  0,
       error:     '',
-      results:   []
+      results:   [],
+      temp:      0,
+      degrees:   'C',
+      text:      'C to F',
+      converted:  0,
+      isHidden:   true,
+      city:       '',
+      country:    '',
+      forecast:   ''
     };
   },
+
   methods : {
-    showPosition(position) {
-      this.longitude = position.coords.longitude;
-      this.latitude = position.coords.latitude;
-    },
     getWeather() {
-      axios.get('https://fcc-weather-api.glitch.me/api/current?lat='
-       + this.latitude + '&lon=' + this.longitude)
-      .then((response) => {
-        this.results = response.data
-      })
-    },
-    celsiusToF() {
-      
+        axios.get('https://fcc-weather-api.glitch.me/api/current?lat='
+         + this.latitude + '&lon=' + this.longitude)
+        .then((response) => {
+          this.results = response.data
+          this.temp = response.data.main.temp
+          this.converted = this.temp
+          this.country = this.results.sys.country
+          this.city = this.results.name
+          this.forecast = this.results.weather.main
+            + ": " + this.results.weather.description
+        })
+        this.isHidden = false
+     },
+    convertDegrees() {
+      if (this.degrees == 'C') {
+        this.text = 'F to C'
+        this.converted = (this.temp * 9/5) + 32
+        this.degrees = 'F'
+      } else {
+        this.text = 'C to F'
+        this.converted = this.temp
+        this.degrees = 'C'
+      }
     }
   },
   created() {
     if (navigator.geolocation) {
-      navigator.geolocation.watchPosition(this.showPosition);
+      navigator.geolocation.getCurrentPosition(position => {
+        this.longitude = position.coords.longitude,
+        this.latitude = position.coords.latitude,
+        this.getWeather()
+      })
     } else {
       this.error = "Geolocation is not supported by this browser.";
     }
@@ -52,4 +73,7 @@ export default {
 }
 </script>
 <style>
+[v-cloak] {
+    display: none;
+  }
 </style>
